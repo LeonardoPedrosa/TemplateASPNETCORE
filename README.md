@@ -1,0 +1,2 @@
+# TemplateASPNETCORE
+TemplateASPNETCORE for projects
