@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,13 +16,32 @@ namespace TemplateASPNETCORE.Controllers
   {
     private readonly IService _service;
 
-    public readonly IUserService _userService;
+    private readonly IUserService _userService;
 
     //D.I - Dependecy Injection
     public UsersController(IService service, IUserService userService)
     {
       _service = service;
       _userService = userService;
+    }
+
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public IActionResult Authenticate([FromBody] User model)
+    {
+      try
+      {
+        var user = _userService.Authenticate(model.name, model.password);
+
+        if (user == null)
+          return BadRequest(new { message = "Usuário ou senha inválidos" });
+
+        return Ok(user);
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(ex);
+      }
     }
 
     // GET: Users
@@ -31,6 +51,7 @@ namespace TemplateASPNETCORE.Controllers
     }
 
     // GET: Users/Details/5
+    [Authorize("admin")]
     public async Task<IActionResult> Details(int? id)
     {
       if (id == null)
