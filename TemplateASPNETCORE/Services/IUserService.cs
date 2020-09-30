@@ -11,6 +11,7 @@ namespace TemplateASPNETCORE.Services
     Task<User[]> GetUsers();
     Task<User> GetUserById(int id);
     Task<bool> UserExists(int id);
-    User Authenticate(string username, string password);
+    UserToken Authenticate(string username, string password);
+    Task<User> Get(string username, string password);
   }
 }

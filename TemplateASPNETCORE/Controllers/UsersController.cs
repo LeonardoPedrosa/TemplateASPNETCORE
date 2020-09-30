@@ -27,14 +27,17 @@ namespace TemplateASPNETCORE.Controllers
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public IActionResult Authenticate([FromBody] User model)
+    public async Task<IActionResult> Authenticate([FromBody] User model)
     {
       try
       {
-        var user = _userService.Authenticate(model.name, model.password);
+        var user =  await _userService.Get(model.name, model.password);
 
         if (user == null)
           return BadRequest(new { message = "Usuário ou senha inválidos" });
+
+        var token = TokenService.GenerateToken(user);
+        user.password = "";
 
         return Ok(user);
       }
