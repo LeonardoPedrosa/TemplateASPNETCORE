@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -22,9 +23,9 @@ namespace TemplateASPNETCORE.Services
       _context = context;
     }
 
-    public UserToken Authenticate(string username, string password)
+    public string GenerateToken(User user)
     {     
-      var user = _context.User.Where(x => x.name == username && x.password == password).FirstOrDefault();
+      var getUser = _context.User.Where(x => x.name == user.name && x.password == user.password).FirstOrDefault();
 
       if (user == null)
         return null;
@@ -35,8 +36,8 @@ namespace TemplateASPNETCORE.Services
       {
         Subject = new ClaimsIdentity(new Claim[]
           {
-                    new Claim(ClaimTypes.Name, user.name),
-                    new Claim("TemplateASPNETCORE", user.role)
+                    new Claim(ClaimTypes.Name, getUser.name.ToString()),
+                    new Claim(ClaimTypes.Role, getUser.role.ToString())
           }),
         Expires = DateTime.UtcNow.AddMinutes(2),
         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -48,7 +49,8 @@ namespace TemplateASPNETCORE.Services
 
       user.password = null;
 
-      return userToken;
+      //return userToken;
+      return userToken.Token;
     }
 
     public async Task<User> GetUserById(int id)

@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TemplateASPNETCORE.Data;
 using TemplateASPNETCORE.Services;
@@ -32,16 +33,17 @@ namespace TemplateASPNETCORE
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+      IdentityModelEventSource.ShowPII = true;
       //add cors 
       services.AddCors();
       //add compatibility version. This does not broken future versions
-      services.AddMvc(config =>
-      {
-        var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .Build();
-        config.Filters.Add(new AuthorizeFilter(policy));
-      }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+      //services.AddMvc(config =>
+      //{
+      //  var policy = new AuthorizationPolicyBuilder()
+      //                  .RequireAuthenticatedUser()
+      //                  .Build();
+      //  config.Filters.Add(new AuthorizeFilter(policy));
+      //}).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
       services.AddAuthorization(options =>
       {
@@ -69,7 +71,11 @@ namespace TemplateASPNETCORE
         };
       });
 
-      services.AddControllersWithViews();
+      services.AddControllersWithViews()
+          .AddNewtonsoftJson(options =>
+          options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+      );
+      
 
       services.AddDbContext<Context>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("Connection")));
@@ -90,7 +96,7 @@ namespace TemplateASPNETCORE
 
       app.UseAuthentication();
 
-      app.UseMvc();
+      //app.UseMvc();
 
       if (env.IsDevelopment())
       {

@@ -7,6 +7,6 @@ namespace TemplateASPNETCORE
 {
   public static class Settings
   {
-    public static string Secret = "";
+    public static string Secret = "chavesecretaparaautenticarapijwt";
   }
 }
