@@ -27,23 +27,24 @@ namespace TemplateASPNETCORE.Controllers
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Authenticate([FromBody] User model)
+    public async Task<ActionResult<dynamic>> Authenticate([FromBody] User model)
     {
       try
       {
-        var user =  await _userService.Get(model.name, model.password);
+        var userToken =  _userService.GenerateToken(model);
 
-        if (user == null)
+        if (userToken == null)
           return BadRequest(new { message = "Usuário ou senha inválidos" });
 
-        var token = TokenService.GenerateToken(user);
-        user.password = "";
-
-        return Ok(user);
+        return new
+        {
+          userToken = userToken
+        };
       }
       catch (Exception ex)
       {
-        return BadRequest(ex);
+        //return BadRequest(ex);
+        return 0;
       }
     }
 
@@ -54,7 +55,7 @@ namespace TemplateASPNETCORE.Controllers
     }
 
     // GET: Users/Details/5
-    [Authorize("admin")]
+    //[Authorize(Roles = "user")]
     public async Task<IActionResult> Details(int? id)
     {
       if (id == null)
@@ -62,7 +63,7 @@ namespace TemplateASPNETCORE.Controllers
         return NotFound();
       }
 
-      var user = _userService.GetUserById(id.Value);
+      var user = await _userService.GetUserById(id.Value);
 
       if (user == null)
       {
@@ -102,7 +103,7 @@ namespace TemplateASPNETCORE.Controllers
         return NotFound();
       }
 
-      var user = _userService.GetUserById(id.Value);
+      var user =  await _userService.GetUserById(id.Value);
 
       if (user == null)
       {
